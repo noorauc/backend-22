@@ -1,64 +1,56 @@
-// Updated line to find the renamed config file
-require('dotenv').config({ path: './config.env' }); 
-
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const { User, Destination } = require('./models/Schemas');
-const { logger, protect } = require('./middleware/auth');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-
-const app = express();
-app.use(express.json());
-app.use(cors());
-app.use(logger);
-
-// Database Connection
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log("MongoDB Connected Successfully"))
-    .catch(err => console.error("Connection Error:", err));
-
-// --- API ENDPOINTS ---
-
-// 1. POST: Register (Auth Entity)
-app.post('/api/auth/register', async (req, res) => {
-    try {
-        const { username, email, password } = req.body;
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({ username, email, password: hashedPassword });
-        await newUser.save();
-        const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
-        res.json({ token, user: { username, email } });
-    } catch (err) {
-        res.status(400).json({ error: "Registration failed" });
-    }
-});
-
-// 2. GET: Retrieve Destinations (Read Operation)
-app.get('/api/destinations', async (req, res) => {
-    const list = await Destination.find();
-    res.json(list);
-});
-
-// 3. POST: Add New Destination (Create Operation - Protected)
-app.post('/api/destinations', protect, async (req, res) => {
-    const entry = new Destination(req.body);
-    await entry.save();
-    res.status(201).json(entry);
-});
-
-// 4. DELETE: Remove Destination (Delete Operation - Protected)
-app.delete('/api/destinations/:id', protect, async (req, res) => {
-    await Destination.findByIdAndDelete(req.params.id);
-    res.json({ message: "Item removed from database" });
-});
-
-// Error Handling Middleware
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send({ error: 'Internal Server Error' });
-});
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`API running at http://localhost:${PORT}`));
+[
+  {
+    "id": "bali",
+    "title": "Ubud Wellness Retreat",
+    "desc": "Experience the spiritual heart of Bali with private jungle villas and traditional holistic healing.",
+    "img": "bali.webp",
+    "weather": "Humid 30°C",
+    "dining": "Locavore",
+    "season": "April - October"
+  },
+  {
+    "id": "egypt",
+    "title": "The Eternal Nile",
+    "desc": "A journey through time featuring private tours of the Giza Pyramids and luxury Nile cruises.",
+    "img": "egypt.jpg",
+    "weather": "Dry 35°C",
+    "dining": "1886 Restaurant",
+    "season": "October - April"
+  },
+  {
+    "id": "santorini",
+    "title": "Oia Sunset Escape",
+    "desc": "Iconic white-washed architecture overlooking the Aegean Sea with world-class cave suites.",
+    "img": "santorini.jpg",
+    "weather": "Sunny 28°C",
+    "dining": "Ambrosia",
+    "season": "May - September"
+  },
+  {
+    "id": "safari",
+    "title": "Serengeti Luxury Safari",
+    "desc": "Unparalleled wildlife viewing from the comfort of high-end canvas tents under the stars.",
+    "img": "safari.webp",
+    "weather": "Mild 24°C",
+    "dining": "Bush Dinner",
+    "season": "June - October"
+  },
+  {
+    "id": "cappadocia",
+    "title": "Anatolian Skies",
+    "desc": "Wake up to hundreds of hot air balloons over the 'Fairy Chimneys' in historical cave dwellings.",
+    "img": "cappadocia.webp",
+    "weather": "Breezy 22°C",
+    "dining": "Seki Restaurant",
+    "season": "April - June"
+  },
+  {
+    "id": "mediterranean",
+    "title": "Amalfi Coast Drive",
+    "desc": "Winding coastal roads, lemon groves, and historic villas perched on dramatic cliffs.",
+    "img": "mediterranean.jpg",
+    "weather": "Warm 26°C",
+    "dining": "La Sponda",
+    "season": "May - September"
+  }
+]
